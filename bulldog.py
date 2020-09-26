@@ -1,8 +1,13 @@
+~
+from math import sin, cos, radians, sqrt, pi
+from random import random
+
 import pygame
 from pygame.draw import *
-from math import atan
 
 pygame.init()
+
+DEBUG = False
 
 FPS = 30
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
@@ -11,152 +16,288 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 screen.fill((255, 255, 255))
 
 
+def draw_parallelogram(x, y, width, height, angle=90, color=(220, 255, 0), outline=0, outlinecolor=(0, 0, 0)):
+    angle = radians(angle)
+    points = (
+        (x, y),
+        (x, y + height),
+        (int(x + width * sin(angle)), int(y + height + width * cos(angle))),
+        (int(x + width * sin(angle)), int(y + width * cos(angle))),
+    )
+    polygon(screen, color, points)
+    if outline:
+        polygon(screen, outlinecolor, points, outline)
+
+
 def draw_with_outline(func, *args, **kwargs):
     """
     COSTIL'!!!!!!!
     """
     args = list(args)
-    func(*args)
+    func(*args, **kwargs)
     args[1] = (0, 0, 0)
-    func(*args, 1)
+    func(*args, 1, **kwargs)
 
 
-def draw_bg(n=20):
-    """
-    :param n: count of fence elements
-    """
+def draw_fence(x, y, width, height, boards=20):
+    rect(screen, (255, 255, 0), (x, y, width, height))
+    line(screen, (0, 0, 0), (x, y), (width, y))  # top line
+    line(screen, (0, 0, 0), (x, y + height), (width, y + height))  # bottom line
+
+    for x_coord in range(x, x + width, width // boards):
+        line(screen, (0, 0, 0), (x_coord, y), (x_coord, y + height))
+
+
+def draw_bg():
     # sky
-    rect(screen, (0, 255, 255), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT // 5))
+    rect(screen, (0, 255, 255), (0, 0, SCREEN_WIDTH, 3 * SCREEN_HEIGHT // 5))
 
     # grass
     rect(screen, (0, 255, 100), (0, 3 * SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5))
 
-    # fence
-    rect(screen, (255, 255, 0), (0, SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5))
-    line(screen, (0, 0, 0), (0, 3 * SCREEN_HEIGHT // 5), (SCREEN_WIDTH, 3 * SCREEN_HEIGHT // 5))
-    for x_coord in range(0, SCREEN_WIDTH, SCREEN_WIDTH // n):
-        line(screen, (0, 0, 0), (x_coord, SCREEN_HEIGHT // 5), (x_coord, 3 * SCREEN_HEIGHT // 5))
+    draw_fence(0, SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5)
 
 
-def draw_chain(x, y):
+def draw_chain(x, y, width, height, links):
+    # making list of lengths of links
+    lengths_of_links = [random() + 0.5 for _ in range(links)]
+    sum_of_lengths = sum(lengths_of_links)
+    lengths_of_links = [3 * length * width / sum_of_lengths / 2 for length in lengths_of_links]
+
+    # making list of lengths of links
+    heights_of_links = [random() + 0.5 for _ in range(links)]
+    sum_of_lengths = sum(heights_of_links)
+    heights_of_links = [3 * length * height / sum_of_lengths / 2 for length in heights_of_links]
+
     # TODO: make it better
-    for i in range(10):
-        circle(screen, (0, 0, 0), (x - i * SCREEN_WIDTH // 70 + SCREEN_WIDTH // 15, y + i * SCREEN_HEIGHT // 100),
-               SCREEN_HEIGHT // 100, 1)
+    for link in range(links):
+        ellipse(screen,
+
+                (0, 0, 0),
+
+                (x - int(sum(lengths_of_links[:link]) / 3 * 2) - int(lengths_of_links[link]) * 2,
+                 y + int(sum(heights_of_links[:link]) / 3 * 2) - int(heights_of_links[link]) * 2,
+                 int(lengths_of_links[link]) * 2,
+                 int(heights_of_links[link]) * 2),
+
+                1)
 
 
-def draw_kennel(x, y):
+def draw_kennel(x, y, length, width, height, roof_height):
     def poly_with_outline(points, color):
+        """
+        Draws a polygon with outline
+        """
         polygon(screen, color, points)
         polygon(screen, (0, 0, 0), points, 1)
 
-    front = (
-        (x, y),
-        (x, y - SCREEN_HEIGHT // 7),
-        (x + SCREEN_WIDTH // 6, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15),
-        (x + SCREEN_WIDTH // 6, y + SCREEN_HEIGHT // 15),
-    )
+    angle1, angle2 = 60, 110  # some params
 
-    right = (
-        (x + SCREEN_WIDTH // 6, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15),
-        (x + SCREEN_WIDTH // 6, y + SCREEN_HEIGHT // 15),
-        (x + SCREEN_WIDTH // 6 + SCREEN_WIDTH // 6, y + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 20),
-        (x + SCREEN_WIDTH // 6 + SCREEN_WIDTH // 6, y + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 20 - SCREEN_HEIGHT // 7)
-    )
+    draw_parallelogram(x, y, -width, -height, angle1, outline=1)  # front
+    draw_parallelogram(x, y, length, -height, angle2, outline=1)  # right
 
+    # roof
     roof_front = (
-        (x, y - SCREEN_HEIGHT // 7),
-        (x + SCREEN_WIDTH // 6, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15),
-        (x + SCREEN_WIDTH // 6 - SCREEN_WIDTH // 16, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 6),
+        (x,
+         y - height),
 
+        (int(x - width * sin(radians(angle1))),
+         int(y - width * cos(radians(angle1)) - height)),
+
+        (int(x - width * sin(radians(angle1)) / 2),
+         int(y - width * cos(radians(angle1)) // 2 - height - roof_height)),
     )
 
     roof_right = (
-        (x + SCREEN_WIDTH // 6, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15),
-        (x + SCREEN_WIDTH // 6 - SCREEN_WIDTH // 16, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 6),
-        (x + SCREEN_WIDTH // 6 - SCREEN_WIDTH // 16 + SCREEN_WIDTH // 6,
-         y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 6 - SCREEN_HEIGHT // 20),
-        (x + SCREEN_WIDTH // 6 + SCREEN_WIDTH // 6, y - SCREEN_HEIGHT // 7 + SCREEN_HEIGHT // 15 - SCREEN_HEIGHT // 20),
+        (x,
+         y - height),
+
+        (int(x - width * sin(radians(angle1)) / 2),
+         int(y - width * cos(radians(angle1)) / 2 - height - roof_height)),
+
+        (int(x - width * sin(radians(angle1)) / 2 + length * cos(radians(angle2 - 90))),
+         int(y - width * cos(radians(angle1)) / 2 - height - roof_height + length * cos(radians(angle2)))),
+
+        (int(x + length * sin(radians(angle2))),
+         int(y - height + length * cos(radians(angle2)))),
     )
 
-    poly_with_outline(front, (220, 255, 0))
-    poly_with_outline(right, (220, 255, 0))
     poly_with_outline(roof_front, (255, 255, 0))
     poly_with_outline(roof_right, (255, 255, 0))
 
     # black hole
-    circle(screen, (0, 0, 0), (x + SCREEN_WIDTH // 12, y - SCREEN_WIDTH // 30), 35)
+    radius = int(sqrt(width * width + height * height) * sin(radians(angle1)) / 4)
+    circle(screen, (0, 0, 0),
+           (int(x - width * sin(radians(angle1)) / 2), int(y - height / 2 - width * cos(radians(angle1)) / 2)), radius)
 
     # chain
-    draw_chain(x, y)
+    draw_chain(int(x - width * sin(radians(angle1)) / 2) - radius // 2,
+               int(y - height / 2 - width * cos(radians(angle1)) / 2 + radius),
+               width,
+               height // 2,
+               10)
 
 
-def draw_dog(x, y, color=(120, 120, 120)):
-    def draw_head():
-        draw_with_outline(
-            rect,
-            screen, color, (x, y, SCREEN_WIDTH // 10, SCREEN_HEIGHT // 10))
+def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
+    def convertx(x_):
+        """
+        Magic x coordinate transformation to the coordinate system of a bulldog
+        """
+        return int(x_ * width / 179)
 
-        draw_with_outline(
-            ellipse,
-            screen, color, ((x - SCREEN_WIDTH // 40, y), (SCREEN_WIDTH // 30, SCREEN_HEIGHT // 20)))
+    def converty(y_):
+        """
+        Magic y coordinate transformation to the coordinate system of a bulldog
+        """
+        return int(y_ * height / 143)
 
-        draw_with_outline(
-            ellipse,
-            screen, color,
-            ((x + SCREEN_WIDTH // 40 + SCREEN_WIDTH // 15, y), (SCREEN_WIDTH // 30, SCREEN_HEIGHT // 20)))
+    def myellipse(x_, y_, w, h, outline=0, color_=color):
+        """
+        draws ellipse in bulldog's coordinate system
+        """
+        ellipse(surface, color_,
+                (int(width * x_ / 179), int(height * y_ / 143), int(w * width / 179), int(h * height / 143)))
+        if outline:
+            ellipse(surface, (0, 0, 0),
+                    (
+                        int(width * x_ / 179), int(height * y_ / 143), int(w * width / 179),
+                        int(h * height / 143)),
+                    outline)
 
     def draw_eyes():
-        ellipse(screen,
-                (255, 255, 255),
-                ((x + SCREEN_WIDTH // 80, y + SCREEN_HEIGHT // 30),
-                 (SCREEN_WIDTH // 30, SCREEN_HEIGHT // 80)))
-        ellipse(screen,
-                (255, 255, 255),
-                ((x - SCREEN_WIDTH // 80 + SCREEN_WIDTH // 10 - SCREEN_WIDTH // 30, y + SCREEN_HEIGHT // 30),
-                 (SCREEN_WIDTH // 30, SCREEN_HEIGHT // 80)))
-        circle(screen,
-               (0, 0, 0),
-               (x + SCREEN_WIDTH // 80 + SCREEN_WIDTH // 60,
-                y + SCREEN_HEIGHT // 30 + SCREEN_HEIGHT // 160),
-               SCREEN_HEIGHT // 150)
-        circle(screen,
-               (0, 0, 0),
-               (x - SCREEN_WIDTH // 80 + SCREEN_WIDTH // 10 - SCREEN_WIDTH // 60,
-                y + SCREEN_HEIGHT // 30 + SCREEN_HEIGHT // 160),
-               SCREEN_HEIGHT // 150)
+        myellipse(28.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
+        myellipse(55.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
+
+        circle(surface, (0, 0, 0), (convertx(35.75), converty(27.5)), min(convertx(2.5), converty(2.5)))
+        circle(surface, (0, 0, 0), (convertx(35.75 + 27), converty(27.5)), min(convertx(2.5), converty(2.5)))
+
+    def draw_ears():
+        myellipse(8, 0, 18, 21, 1)
+        myellipse(73, 0, 18, 21, 1)
+
+    def draw_mouth():
+        arc(surface, (0, 0, 0), (convertx(29), converty(49), convertx(41), converty(35)), pi / 15, pi - pi / 15)
+
+        left_tooth = (
+            (convertx(37.5), converty(52)),
+            (convertx(31), converty(59)),
+            (convertx(33.5), converty(45)),
+
+        )
+        right_tooth = (
+            (convertx(61.5), converty(52)),
+            (convertx(68), converty(59)),
+            (convertx(65.5), converty(45)),
+
+        )
+
+        draw_with_outline(polygon, surface, (255, 255, 255), left_tooth)
+        draw_with_outline(polygon, surface, (255, 255, 255), right_tooth)
+
+    def draw_head():
+        # head
+        draw_with_outline(rect, surface, color,
+                          (int(width * 17 / 179), 0, int(width * 65 / 179), int(height * 72 / 143)))
+
+        # eyes
+        draw_eyes()
+
+        # ears
+        draw_ears()
+
+        # mouth
+        draw_mouth()
+
+    def draw_front_leg(x_, y_):
+        myellipse(x_, y_, 35, 66)
+        myellipse(x_ - 8, y_ + 63, 33, 13)
+
+    def draw_hind_leg(x_, y_):
+        myellipse(x_, y_, 38, 44)
+        myellipse(x_ + 28, y_ + 32, 12, 41)
+        myellipse(x_ + 11, y_ + 70, 26, 13)
+
+    def draw_torso(x_, y_):
+        myellipse(x_, y_, 101, 61)
+        myellipse(x_ + 73, y_ - 10, 66, 45)
 
     def draw_body():
-        def draw_front_leg(x, y):
-            ellipse(screen, color,
-                    ((x - SCREEN_WIDTH // 40, y + SCREEN_HEIGHT // 15), (SCREEN_WIDTH // 15, SCREEN_HEIGHT // 7)))
-            ellipse(screen, color, ((x - SCREEN_WIDTH // 25, y + SCREEN_HEIGHT // 6 + SCREEN_HEIGHT // 50),
-                                    (SCREEN_WIDTH // 15, SCREEN_HEIGHT // 30)))
+        # front legs
+        draw_front_leg(66, 68)
+        draw_front_leg(9, 45)
 
-        ellipse(screen, color, ((x, y + SCREEN_HEIGHT // 30), (SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10)))
-        ellipse(screen, color,
-                ((x + SCREEN_WIDTH // 10, y - SCREEN_HEIGHT // 50), (SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10)))
-        draw_front_leg(x, y)
-        draw_front_leg(x + SCREEN_WIDTH // 10, y + SCREEN_HEIGHT // 25)
-        draw_front_leg(x + SCREEN_WIDTH // 4, y - SCREEN_HEIGHT // 25)
-        draw_front_leg(x + SCREEN_WIDTH // 4 - SCREEN_WIDTH // 10, y - 2 * SCREEN_HEIGHT // 25)
+        # hind legs
+        draw_hind_leg(138, 34)
+        draw_hind_leg(96, 15)
+
+        # torso
+        draw_torso(21, 25)
+
+    surface = pygame.Surface((width, height), pygame.SRCALPHA)
 
     draw_body()
     draw_head()
-    draw_eyes()
+
+    if DEBUG:
+        rect(surface, (255, 0, 0), (x, y, width, height), 1)
+
+    screen.blit(pygame.transform.flip(surface, mirror, False), (x, y))
 
 
-draw_bg()
-draw_kennel(500, 650)
-draw_dog(100, 550)
-pygame.display.update()
+def draw_net(a=100, b=100):
+    for x_coord in range(0, SCREEN_WIDTH, a):
+        line(screen, (255, 0, 0), (x_coord, 0), (x_coord, SCREEN_HEIGHT), 1)
+    for y_coord in range(0, SCREEN_HEIGHT, b):
+        line(screen, (255, 0, 0), (0, y_coord), (SCREEN_WIDTH, y_coord), 1)
+
+
+def draw_picture_v1():
+    draw_bg()
+    draw_kennel(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+    draw_dog(100, 500, 179 * 27 // 17, 143 * 27 // 17)
+
+    if DEBUG:
+        draw_net()
+
+
+def draw_picture_v2():
+    draw_bg()
+
+    draw_fence(0, 150, 250, 300)
+
+    draw_fence(200, 10, 650, 350)
+
+    draw_dog(600, 400, 179 * 20 // 17, 143 * 20 // 17, mirror=True)
+
+    draw_kennel(600, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+
+    draw_dog(120, 550, 179 * 27 // 17, 143 * 27 // 17, mirror=True)
+
+    draw_dog(70, 335, 179 * 27 // 17, 143 * 27 // 17)
+
+    draw_dog(500, 550, 179 * 27 // 8, 143 * 27 // 8)
+
+    if DEBUG:
+        draw_net()
+
+
+def eventloop():
+    finished = False
+    while not finished:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+
+
 clock = pygame.time.Clock()
-finished = False
 
-while not finished:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
+# draw_picture_v1()
+
+draw_picture_v2()
+
+pygame.display.update()
+
+eventloop()
 
 pygame.quit()
