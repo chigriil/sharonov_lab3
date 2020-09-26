@@ -83,7 +83,7 @@ def draw_chain(x, y, width, height, links):
                 1)
 
 
-def draw_kennel(x, y, length, width, height, roof_height):
+def draw_doghouse(x, y, length, width, height, roof_height):
     def poly_with_outline(points, color):
         """
         Draws a polygon with outline
@@ -253,7 +253,7 @@ def draw_net(a=100, b=100):
 
 def draw_picture_v1():
     draw_bg()
-    draw_kennel(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+    draw_doghouse(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
     draw_dog(100, 500, 179 * 27 // 17, 143 * 27 // 17)
 
     if DEBUG:
@@ -269,7 +269,7 @@ def draw_picture_v2():
 
     draw_dog(600, 400, 179 * 20 // 17, 143 * 20 // 17, mirror=True)
 
-    draw_kennel(600, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+    draw_doghouse(600, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
 
     draw_dog(120, 550, 179 * 27 // 17, 143 * 27 // 17, mirror=True)
 
