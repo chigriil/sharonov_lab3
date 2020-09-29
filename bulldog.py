@@ -3,6 +3,7 @@ from random import random
 
 import pygame
 from pygame.draw import *
+from typing import Tuple, Union
 
 pygame.init()
 
@@ -15,22 +16,37 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 screen.fill((255, 255, 255))
 
 
-def draw_parallelogram(x, y, width, height, angle=90, color=(220, 255, 0), outline=0, outlinecolor=(0, 0, 0)):
+def draw_parallelogram(x: int, y: int, width: int, height: int, angle: int = 90,
+                       color: Tuple[int, int, int] = (220, 255, 0), outline: int = 0, outlinecolor=(0, 0, 0)):
+    """
+    Draws a parallelogram with one vertical side
+    If you set negative values for width and height the parallelogram will be drawn in the other direction
+    @param x: x coordinate of the upper-left corner of the parallelogram
+    @param y: y coordinate of the upper-left corner of the parallelogram
+    @param width: length of the not vertical side of the parallelogram
+    @param height: length of the vertical side of the parallelogram
+    @param angle: angle between sides
+    @param color: the fill color of the parallelogram
+    @param outline: thickness of the outer line of the parallelogram
+    @param outlinecolor: color of the outer line of the parallelogram
+    @return: None
+    """
     angle = radians(angle)
-    points = (
+    vertex = (
         (x, y),
         (x, y + height),
         (int(x + width * sin(angle)), int(y + height + width * cos(angle))),
         (int(x + width * sin(angle)), int(y + width * cos(angle))),
     )
-    polygon(screen, color, points)
+    polygon(screen, color, vertex)
     if outline:
-        polygon(screen, outlinecolor, points, outline)
+        polygon(screen, outlinecolor, vertex, outline)
 
 
 def draw_with_outline(func, *args, **kwargs):
     """
     COSTIL'!!!!!!!
+    Draws figure with outline using magic
     """
     args = list(args)
     func(*args, **kwargs)
@@ -38,7 +54,16 @@ def draw_with_outline(func, *args, **kwargs):
     func(*args, 1, **kwargs)
 
 
-def draw_fence(x, y, width, height, boards=20):
+def draw_fence(x: int, y: int, width: int, height: int, boards=20):
+    """
+    Draws a fence
+    @param x: x coordinate of upper-left corner of the fence
+    @param y: y coordinate of upper-left corner of the fence
+    @param width: width of the fence
+    @param height: height of the fence
+    @param boards: number of boards in the fence
+    """
+
     rect(screen, (255, 255, 0), (x, y, width, height))
     line(screen, (0, 0, 0), (x, y), (width, y))  # top line
     line(screen, (0, 0, 0), (x, y + height), (width, y + height))  # bottom line
@@ -48,6 +73,10 @@ def draw_fence(x, y, width, height, boards=20):
 
 
 def draw_bg():
+    """
+    Draws a background
+    @return: None
+    """
     # sky
     rect(screen, (0, 255, 255), (0, 0, SCREEN_WIDTH, 3 * SCREEN_HEIGHT // 5))
 
@@ -57,7 +86,16 @@ def draw_bg():
     draw_fence(0, SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5)
 
 
-def draw_chain(x, y, width, height, links):
+def draw_chain(x: int, y: int, width: int, height: int, links: int):
+    """
+    Draws a chain
+    @param x: x coordinate of upper-left corner of the described rectangle
+    @param y: y coordinate of upper-left corner of the described rectangle
+    @param width: width of the described rectangle
+    @param height: height of  the described rectangle
+    @param links: number of links
+    @return: None
+    """
     # making list of lengths of links
     lengths_of_links = [random() + 0.5 for _ in range(links)]
     sum_of_lengths = sum(lengths_of_links)
@@ -82,10 +120,23 @@ def draw_chain(x, y, width, height, links):
                 1)
 
 
-def draw_doghouse(x, y, length, width, height, roof_height):
+def draw_doghouse(x: int, y: int, length: int, width: int, height: int, roof_height: int):
+    """
+    Draws a doghouse
+    @param x: x coordinate of the lowers point of doghuose
+    @param y: y coordinate of the lowers point of doghuose
+    @param length: length of the doghouse
+    @param width: width of the doghouse
+    @param height: height of the doghouse
+    @param roof_height: height of the roof of the doghouse
+    @return: None
+    """
+
     def poly_with_outline(points, color):
         """
         Draws a polygon with outline
+        @param points: points that the polygon passes through
+        @param color: the fill color of the polygon
         """
         polygon(screen, color, points)
         polygon(screen, (0, 0, 0), points, 1)
@@ -138,21 +189,29 @@ def draw_doghouse(x, y, length, width, height, roof_height):
 
 
 def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
-    def convertx(x_):
+    def convertx(x_: Union[int, float]):
         """
         Magic x coordinate transformation to the coordinate system of a bulldog
         """
         return int(x_ * width / 179)
 
-    def converty(y_):
+    def converty(y_: Union[int, float]):
         """
         Magic y coordinate transformation to the coordinate system of a bulldog
         """
         return int(y_ * height / 143)
 
-    def myellipse(x_, y_, w, h, outline=0, color_=color):
+    def myellipse(x_: Union[int, float], y_: Union[int, float], w: Union[int, float], h: Union[int, float],
+                  outline: int = 0, color_: Tuple[int, int, int] = color):
         """
         draws ellipse in bulldog's coordinate system
+        @param x_: x coordinate of upper-left corner of the described rectangle of the ellipse
+        @param y_: y coordinate of upper-left corner of the described rectangle of the ellipse
+        @param w: width of the described rectangle of the ellipse
+        @param h: height of the described rectangle of the ellipse
+        @param outline: width of the outline of the described rectangle of the ellipse
+        @param color_: color of the ellipse
+        @return: None
         """
         ellipse(surface, color_,
                 (int(width * x_ / 179), int(height * y_ / 143), int(w * width / 179), int(h * height / 143)))
@@ -164,6 +223,10 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
                     outline)
 
     def draw_eyes():
+        """
+        Draws a eyes
+        @return: None
+        """
         myellipse(28.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
         myellipse(55.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
 
@@ -171,10 +234,18 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         circle(surface, (0, 0, 0), (convertx(35.75 + 27), converty(27.5)), min(convertx(2.5), converty(2.5)))
 
     def draw_ears():
+        """
+        Draws a ears
+        @return: None
+        """
         myellipse(8, 0, 18, 21, 1)
         myellipse(73, 0, 18, 21, 1)
 
     def draw_mouth():
+        """
+        Draws a mouth
+        @return: None
+        """
         arc(surface, (0, 0, 0), (convertx(29), converty(49), convertx(41), converty(35)), pi / 15, pi - pi / 15)
 
         left_tooth = (
@@ -194,6 +265,10 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         draw_with_outline(polygon, surface, (255, 255, 255), right_tooth)
 
     def draw_head():
+        """
+        Draws a head
+        @return: None
+        """
         # head
         draw_with_outline(rect, surface, color,
                           (int(width * 17 / 179), 0, int(width * 65 / 179), int(height * 72 / 143)))
@@ -208,19 +283,41 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         draw_mouth()
 
     def draw_front_leg(x_, y_):
+        """
+        Draws a front leg
+        @param x_: x coordinate of a certain point of the front leg where drawing starts
+        @param y_: y coordinate of a certain point of the front leg where drawing starts
+        @return: None
+        """
         myellipse(x_, y_, 35, 66)
         myellipse(x_ - 8, y_ + 63, 33, 13)
 
     def draw_hind_leg(x_, y_):
+        """
+        Draws a hind leg
+        @param x_: x coordinate of a certain point of the hind leg where drawing starts
+        @param y_: y coordinate of a certain point of the hind leg where drawing starts
+        @return: None
+        """
         myellipse(x_, y_, 38, 44)
         myellipse(x_ + 28, y_ + 32, 12, 41)
         myellipse(x_ + 11, y_ + 70, 26, 13)
 
     def draw_torso(x_, y_):
+        """
+        Draws a torso
+        @param x_: x coordinate of a certain point of the torso where drawing starts
+        @param y_: y coordinate of a certain point of the torso where drawing starts
+        @return: None
+        """
         myellipse(x_, y_, 101, 61)
         myellipse(x_ + 73, y_ - 10, 66, 45)
 
     def draw_body():
+        """
+        Draws a body of the bulldog
+        @return: None
+        """
         # front legs
         draw_front_leg(66, 68)
         draw_front_leg(9, 45)
@@ -243,14 +340,24 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
     screen.blit(pygame.transform.flip(surface, mirror, False), (x, y))
 
 
-def draw_net(a=100, b=100):
-    for x_coord in range(0, SCREEN_WIDTH, a):
+def draw_net(step_x=100, step_y=100):
+    """
+    Draws a debug grid with the specified step
+    @param step_x: grid step by the x-axis
+    @param step_y: grid step by the y-axis
+    @return: None
+    """
+    for x_coord in range(0, SCREEN_WIDTH, step_x):
         line(screen, (255, 0, 0), (x_coord, 0), (x_coord, SCREEN_HEIGHT), 1)
-    for y_coord in range(0, SCREEN_HEIGHT, b):
+    for y_coord in range(0, SCREEN_HEIGHT, step_y):
         line(screen, (255, 0, 0), (0, y_coord), (SCREEN_WIDTH, y_coord), 1)
 
 
 def draw_picture_v1():
+    """
+    Draws the first picture
+    @return: None
+    """
     draw_bg()
     draw_doghouse(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
     draw_dog(100, 500, 179 * 27 // 17, 143 * 27 // 17)
@@ -260,6 +367,10 @@ def draw_picture_v1():
 
 
 def draw_picture_v2():
+    """
+    Draws the second picture
+    @return: None
+    """
     draw_bg()
 
     draw_fence(0, 150, 250, 300)
@@ -281,6 +392,10 @@ def draw_picture_v2():
 
 
 def eventloop():
+    """
+    Eventloop
+    @return: None
+    """
     finished = False
     while not finished:
         clock.tick(FPS)
