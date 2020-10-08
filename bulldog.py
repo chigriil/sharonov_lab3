@@ -5,6 +5,15 @@ import pygame
 from pygame.draw import *
 from typing import Tuple, Union
 
+# Colors
+WHITE = (250, 250, 250)
+GREEN = (220, 255, 0)
+BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)
+GRAY = (120, 120, 120)
+BLUE = (0, 255, 255)
+LIGHT_GREEN = (0, 255, 100)
+
 pygame.init()
 
 DEBUG = False
@@ -13,14 +22,16 @@ FPS = 30
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-screen.fill((255, 255, 255))
+screen.fill(WHITE)
 
 
 def draw_parallelogram(x: int, y: int, width: int, height: int, angle: int = 90,
-                       color: Tuple[int, int, int] = (220, 255, 0), outline: int = 0, outlinecolor=(0, 0, 0)):
+                       color: Tuple[int, int, int] = GREEN,
+                       outline: int = 0, outlinecolor=BLACK):
     """
     Draws a parallelogram with one vertical side
-    If you set negative values for width and height the parallelogram will be drawn in the other direction
+    If you set negative values for width and height the parallelogram will be
+    drawn in the other direction
     @param x: x coordinate of the upper-left corner of the parallelogram
     @param y: y coordinate of the upper-left corner of the parallelogram
     @param width: length of the not vertical side of the parallelogram
@@ -43,15 +54,15 @@ def draw_parallelogram(x: int, y: int, width: int, height: int, angle: int = 90,
         polygon(screen, outlinecolor, vertex, outline)
 
 
-def draw_with_outline(func, *args, **kwargs):
+def draw_with_outline(func, *args):
     """
-    COSTIL'!!!!!!!
-    Draws figure with outline using magic
+    Kludge
+    Draws figure with outline
     """
     args = list(args)
-    func(*args, **kwargs)
-    args[1] = (0, 0, 0)
-    func(*args, 1, **kwargs)
+    func(*args)
+    args[1] = BLACK
+    func(*args, 1)
 
 
 def draw_fence(x: int, y: int, width: int, height: int, boards=20):
@@ -64,12 +75,12 @@ def draw_fence(x: int, y: int, width: int, height: int, boards=20):
     @param boards: number of boards in the fence
     """
 
-    rect(screen, (255, 255, 0), (x, y, width, height))
-    line(screen, (0, 0, 0), (x, y), (width, y))  # top line
-    line(screen, (0, 0, 0), (x, y + height), (width, y + height))  # bottom line
+    rect(screen, YELLOW, (x, y, width, height))
+    line(screen, BLACK, (x, y), (width, y))  # top line
+    line(screen, BLACK, (x, y + height), (width, y + height))  # bottom line
 
     for x_coord in range(x, x + width, width // boards):
-        line(screen, (0, 0, 0), (x_coord, y), (x_coord, y + height))
+        line(screen, BLACK, (x_coord, y), (x_coord, y + height))
 
 
 def draw_bg():
@@ -78,10 +89,11 @@ def draw_bg():
     @return: None
     """
     # sky
-    rect(screen, (0, 255, 255), (0, 0, SCREEN_WIDTH, 3 * SCREEN_HEIGHT // 5))
+    rect(screen, BLUE, (0, 0, SCREEN_WIDTH, 3 * SCREEN_HEIGHT // 5))
 
     # grass
-    rect(screen, (0, 255, 100), (0, 3 * SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5))
+    rect(screen, LIGHT_GREEN, (0, 3 * SCREEN_HEIGHT // 5, SCREEN_WIDTH,
+                               2 * SCREEN_HEIGHT // 5))
 
     draw_fence(0, SCREEN_HEIGHT // 5, SCREEN_WIDTH, 2 * SCREEN_HEIGHT // 5)
 
@@ -99,32 +111,34 @@ def draw_chain(x: int, y: int, width: int, height: int, links: int):
     # making list of lengths of links
     lengths_of_links = [random() + 0.5 for _ in range(links)]
     sum_of_lengths = sum(lengths_of_links)
-    lengths_of_links = [3 * length * width / sum_of_lengths / 2 for length in lengths_of_links]
+    lengths_of_links = [3 * length * width / sum_of_lengths / 2 for length in
+                        lengths_of_links]
 
     # making list of lengths of links
     heights_of_links = [random() + 0.5 for _ in range(links)]
     sum_of_lengths = sum(heights_of_links)
-    heights_of_links = [3 * length * height / sum_of_lengths / 2 for length in heights_of_links]
+    heights_of_links = [3 * length * height / sum_of_lengths / 2 for length in
+                        heights_of_links]
 
-    # TODO: make it better
     for link in range(links):
         ellipse(screen,
 
-                (0, 0, 0),
+                BLACK,
 
-                (x - int(sum(lengths_of_links[:link]) / 3 * 2) - int(lengths_of_links[link]) * 2,
-                 y + int(sum(heights_of_links[:link]) / 3 * 2) - int(heights_of_links[link]) * 2,
+                (x - int(sum(lengths_of_links[:link]) / 3 * 2) -
                  int(lengths_of_links[link]) * 2,
-                 int(heights_of_links[link]) * 2),
+                 y + int(sum(heights_of_links[:link]) / 3 * 2) -
+                 int(heights_of_links[link]) * 2,
+                 int(lengths_of_links[link]) * 2,
+                 int(heights_of_links[link]) * 2), 1)
 
-                1)
 
-
-def draw_doghouse(x: int, y: int, length: int, width: int, height: int, roof_height: int):
+def draw_doghouse(x: int, y: int, length: int, width: int, height: int,
+                  roof_height: int):
     """
     Draws a doghouse
-    @param x: x coordinate of the lowers point of doghuose
-    @param y: y coordinate of the lowers point of doghuose
+    @param x: x coordinate of the lowers point of doghouse
+    @param y: y coordinate of the lowers point of doghouse
     @param length: length of the doghouse
     @param width: width of the doghouse
     @param height: height of the doghouse
@@ -139,7 +153,7 @@ def draw_doghouse(x: int, y: int, length: int, width: int, height: int, roof_hei
         @param color: the fill color of the polygon
         """
         polygon(screen, color, points)
-        polygon(screen, (0, 0, 0), points, 1)
+        polygon(screen, BLACK, points, 1)
 
     angle1, angle2 = 60, 110  # some params
 
@@ -165,20 +179,24 @@ def draw_doghouse(x: int, y: int, length: int, width: int, height: int, roof_hei
         (int(x - width * sin(radians(angle1)) / 2),
          int(y - width * cos(radians(angle1)) / 2 - height - roof_height)),
 
-        (int(x - width * sin(radians(angle1)) / 2 + length * cos(radians(angle2 - 90))),
-         int(y - width * cos(radians(angle1)) / 2 - height - roof_height + length * cos(radians(angle2)))),
+        (int(x - width * sin(radians(angle1)) / 2 +
+             length * cos(radians(angle2 - 90))),
+         int(y - width * cos(radians(angle1)) / 2 -
+             height - roof_height + length * cos(radians(angle2)))),
 
         (int(x + length * sin(radians(angle2))),
          int(y - height + length * cos(radians(angle2)))),
     )
 
-    poly_with_outline(roof_front, (255, 255, 0))
-    poly_with_outline(roof_right, (255, 255, 0))
+    poly_with_outline(roof_front, YELLOW)
+    poly_with_outline(roof_right, YELLOW)
 
     # black hole
-    radius = int(sqrt(width * width + height * height) * sin(radians(angle1)) / 4)
-    circle(screen, (0, 0, 0),
-           (int(x - width * sin(radians(angle1)) / 2), int(y - height / 2 - width * cos(radians(angle1)) / 2)), radius)
+    radius = int(sqrt(width * width + height * height) *
+                 sin(radians(angle1)) / 4)
+    circle(screen, BLACK,
+           (int(x - width * sin(radians(angle1)) / 2),
+            int(y - height / 2 - width * cos(radians(angle1)) / 2)), radius)
 
     # chain
     draw_chain(int(x - width * sin(radians(angle1)) / 2) - radius // 2,
@@ -188,7 +206,7 @@ def draw_doghouse(x: int, y: int, length: int, width: int, height: int, roof_hei
                10)
 
 
-def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
+def draw_dog(x, y, width, height, color=GRAY, mirror=False):
     def convertx(x_: Union[int, float]):
         """
         Magic x coordinate transformation to the coordinate system of a bulldog
@@ -201,24 +219,30 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         """
         return int(y_ * height / 143)
 
-    def myellipse(x_: Union[int, float], y_: Union[int, float], w: Union[int, float], h: Union[int, float],
+    def myellipse(x_: Union[int, float], y_: Union[int, float],
+                  w: Union[int, float], h: Union[int, float],
                   outline: int = 0, color_: Tuple[int, int, int] = color):
         """
         draws ellipse in bulldog's coordinate system
-        @param x_: x coordinate of upper-left corner of the described rectangle of the ellipse
-        @param y_: y coordinate of upper-left corner of the described rectangle of the ellipse
+        @param x_: x coordinate of upper-left corner of the described rectangle
+        of the ellipse
+        @param y_: y coordinate of upper-left corner of the described rectangle
+        of the ellipse
         @param w: width of the described rectangle of the ellipse
         @param h: height of the described rectangle of the ellipse
-        @param outline: width of the outline of the described rectangle of the ellipse
+        @param outline: width of the outline of the described rectangle of the
+        ellipse
         @param color_: color of the ellipse
         @return: None
         """
         ellipse(surface, color_,
-                (int(width * x_ / 179), int(height * y_ / 143), int(w * width / 179), int(h * height / 143)))
+                (int(width * x_ / 179), int(height * y_ / 143),
+                 int(w * width / 179), int(h * height / 143)))
         if outline:
-            ellipse(surface, (0, 0, 0),
+            ellipse(surface, BLACK,
                     (
-                        int(width * x_ / 179), int(height * y_ / 143), int(w * width / 179),
+                        int(width * x_ / 179), int(height * y_ / 143),
+                        int(w * width / 179),
                         int(h * height / 143)),
                     outline)
 
@@ -227,11 +251,13 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         Draws a eyes
         @return: None
         """
-        myellipse(28.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
-        myellipse(55.5, 25, 14.5, 5, color_=(255, 255, 255), outline=1)
+        myellipse(28.5, 25, 14.5, 5, color_=WHITE, outline=1)
+        myellipse(55.5, 25, 14.5, 5, color_=WHITE, outline=1)
 
-        circle(surface, (0, 0, 0), (convertx(35.75), converty(27.5)), min(convertx(2.5), converty(2.5)))
-        circle(surface, (0, 0, 0), (convertx(35.75 + 27), converty(27.5)), min(convertx(2.5), converty(2.5)))
+        circle(surface, BLACK, (convertx(35.75), converty(27.5)),
+               min(convertx(2.5), converty(2.5)))
+        circle(surface, BLACK, (convertx(35.75 + 27), converty(27.5)),
+               min(convertx(2.5), converty(2.5)))
 
     def draw_ears():
         """
@@ -246,7 +272,8 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         Draws a mouth
         @return: None
         """
-        arc(surface, (0, 0, 0), (convertx(29), converty(49), convertx(41), converty(35)), pi / 15, pi - pi / 15)
+        arc(surface, BLACK, (convertx(29), converty(49), convertx(41),
+                             converty(35)), pi / 15, pi - pi / 15)
 
         left_tooth = (
             (convertx(37.5), converty(52)),
@@ -261,8 +288,8 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
 
         )
 
-        draw_with_outline(polygon, surface, (255, 255, 255), left_tooth)
-        draw_with_outline(polygon, surface, (255, 255, 255), right_tooth)
+        draw_with_outline(polygon, surface, WHITE, left_tooth)
+        draw_with_outline(polygon, surface, WHITE, right_tooth)
 
     def draw_head():
         """
@@ -271,7 +298,8 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
         """
         # head
         draw_with_outline(rect, surface, color,
-                          (int(width * 17 / 179), 0, int(width * 65 / 179), int(height * 72 / 143)))
+                          (int(width * 17 / 179), 0, int(width * 65 / 179),
+                           int(height * 72 / 143)))
 
         # eyes
         draw_eyes()
@@ -285,8 +313,10 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
     def draw_front_leg(x_, y_):
         """
         Draws a front leg
-        @param x_: x coordinate of a certain point of the front leg where drawing starts
-        @param y_: y coordinate of a certain point of the front leg where drawing starts
+        @param x_: x coordinate of a certain point of the front leg where
+        drawing starts
+        @param y_: y coordinate of a certain point of the front leg where
+        drawing starts
         @return: None
         """
         myellipse(x_, y_, 35, 66)
@@ -295,8 +325,10 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
     def draw_hind_leg(x_, y_):
         """
         Draws a hind leg
-        @param x_: x coordinate of a certain point of the hind leg where drawing starts
-        @param y_: y coordinate of a certain point of the hind leg where drawing starts
+        @param x_: x coordinate of a certain point of the hind leg where
+        drawing starts
+        @param y_: y coordinate of a certain point of the hind leg where
+        drawing starts
         @return: None
         """
         myellipse(x_, y_, 38, 44)
@@ -306,8 +338,10 @@ def draw_dog(x, y, width, height, color=(120, 120, 120), mirror=False):
     def draw_torso(x_, y_):
         """
         Draws a torso
-        @param x_: x coordinate of a certain point of the torso where drawing starts
-        @param y_: y coordinate of a certain point of the torso where drawing starts
+        @param x_: x coordinate of a certain point of the torso where
+        drawing starts
+        @param y_: y coordinate of a certain point of the torso where
+        drawing starts
         @return: None
         """
         myellipse(x_, y_, 101, 61)
@@ -359,7 +393,8 @@ def draw_picture_v1():
     @return: None
     """
     draw_bg()
-    draw_doghouse(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+    draw_doghouse(650, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7,
+                  SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
     draw_dog(100, 500, 179 * 27 // 17, 143 * 27 // 17)
 
     if DEBUG:
@@ -379,7 +414,8 @@ def draw_picture_v2():
 
     draw_dog(600, 400, 179 * 20 // 17, 143 * 20 // 17, mirror=True)
 
-    draw_doghouse(600, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
+    draw_doghouse(600, 700, SCREEN_WIDTH // 6, SCREEN_WIDTH // 7,
+                  SCREEN_HEIGHT // 7, SCREEN_HEIGHT // 9)
 
     draw_dog(120, 550, 179 * 27 // 17, 143 * 27 // 17, mirror=True)
 
